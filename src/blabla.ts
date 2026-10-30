@@ -32,8 +32,11 @@ async function doLogin(): Promise<string> {
     .map((s) => s.split(";")[0])
     .filter(Boolean);
   const j = (await res.json()) as { code?: number; msg?: string };
-  if (j.code !== 0 || !cookies.length)
-    throw new Error(`blabla login failed: ${j.msg ?? res.status}`);
+  if (j.code !== 0 || !cookies.length) {
+    cookieJar = null;
+    const detail = j.msg ?? "no session cookie returned";
+    throw new Error(`blabla login failed: http=${res.status}, code=${j.code ?? "unknown"}, msg=${detail}`);
+  }
   cookieJar = cookies.join("; ");
   return cookieJar;
 }
